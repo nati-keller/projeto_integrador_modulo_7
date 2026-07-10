@@ -18,7 +18,7 @@ class EditalRepository
             ->where('a.id_cliente', $empresaId)
             ->where('a.status', 'go')
             ->where('a.processing_status', 'done')
-            ->select('e.edital_id', 'e.orgao', 'e.objeto',
+            ->select('e.edital_id', 'e.orgao', 'e.objeto', 'e.quantidade',
                      'a.match_score', 'a.financial_summary')
             ->orderByDesc('a.match_score')
             ->get();

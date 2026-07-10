@@ -14,7 +14,10 @@
                 <p class="text-xs text-primary-600 font-bold uppercase tracking-[0.1em] mb-1">Preço Mínimo Calculado</p>
                 <div class="flex items-baseline gap-2">
                     <span class="text-xl font-medium text-surface-400">R$</span>
-                    <p id="preview-preco" class="text-4xl font-extrabold text-surface-900 tracking-tight">0,00</p>
+                    <p id="preview-preco" class="text-4xl font-extrabold text-surface-900 tracking-tight" title="Preço Unitário">0,00</p>
+                </div>
+                <div class="mt-1 text-sm text-surface-500 font-medium hidden" id="preview-total-container">
+                    Total: R$ <span id="preview-total" class="font-bold">0,00</span>
                 </div>
             </div>
             <div class="text-right">
@@ -78,18 +81,28 @@
                     Identificação
                 </h3>
             </div>
-            <div class="card-body grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div class="md:col-span-2">
+            <div class="card-body grid grid-cols-1 md:grid-cols-12 gap-5">
+                <div class="md:col-span-12">
                     <label class="form-label">Descrição do Item <span class="text-red-500">*</span></label>
                     <input type="text" name="item_descricao" value="{{ old('item_descricao') }}"
                            class="form-input" placeholder="Ex: Cadeira Ergonômica..." required>
                     @error('item_descricao')<p class="form-error">{{ $message }}</p>@enderror
                 </div>
-                <div>
-                    <label class="form-label text-surface-500">Estimado PNCP (R$)</label>
-                    <input type="number" name="preco_estimado_pncp" value="{{ old('preco_estimado_pncp') }}"
+                <div class="md:col-span-4">
+                    <label class="form-label text-surface-500">Quantidade <span class="text-red-500">*</span></label>
+                    <input type="number" name="quantidade" id="quantidade" value="{{ old('quantidade', 1) }}"
+                           class="form-input calc-trigger text-surface-900 font-mono" min="1" placeholder="1" required>
+                    @error('quantidade')<p class="form-error">{{ $message }}</p>@enderror
+                </div>
+                <div class="md:col-span-4">
+                    <label class="form-label text-surface-500">Valor Unit. Estimado (R$)</label>
+                    <input type="number" name="preco_estimado_pncp" id="preco_estimado_pncp" value="{{ old('preco_estimado_pncp') }}"
                            class="form-input calc-trigger text-surface-900 font-mono" step="0.01" min="0" placeholder="0.00">
                     @error('preco_estimado_pncp')<p class="form-error">{{ $message }}</p>@enderror
+                </div>
+                <div class="md:col-span-4">
+                    <label class="form-label text-surface-500">Valor Total Estimado (R$)</label>
+                    <input type="text" id="valor_total_estimado_pncp" class="form-input bg-surface-50 text-surface-900 font-mono" readonly placeholder="0,00">
                 </div>
             </div>
         </div>
@@ -112,19 +125,51 @@
                     </div>
                     <div>
                         <label class="form-label text-surface-500">Frete (R$)</label>
-                        <input type="number" name="frete" value="{{ old('frete', 0) }}" class="form-input calc-trigger font-mono text-sm" step="0.01" min="0">
+                        <div class="relative">
+                            <input type="number" name="frete" value="{{ old('frete', 0) }}" class="form-input calc-trigger font-mono text-sm pr-[4.5rem] w-full" step="0.01" min="0">
+                            <div class="absolute inset-y-0 right-0 flex items-center">
+                                <select name="frete_tipo" class="h-full py-0 pl-1 pr-6 border-transparent bg-transparent text-primary-600 font-medium text-[10px] uppercase tracking-wider focus:ring-0 cursor-pointer calc-trigger text-right">
+                                    <option value="unitario">/ UN</option>
+                                    <option value="total">/ TOT</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label class="form-label text-surface-500">Garantia (R$)</label>
-                        <input type="number" name="garantia" value="{{ old('garantia', 0) }}" class="form-input calc-trigger font-mono text-sm" step="0.01" min="0">
+                        <div class="relative">
+                            <input type="number" name="garantia" value="{{ old('garantia', 0) }}" class="form-input calc-trigger font-mono text-sm pr-[4.5rem] w-full" step="0.01" min="0">
+                            <div class="absolute inset-y-0 right-0 flex items-center">
+                                <select name="garantia_tipo" class="h-full py-0 pl-1 pr-6 border-transparent bg-transparent text-primary-600 font-medium text-[10px] uppercase tracking-wider focus:ring-0 cursor-pointer calc-trigger text-right">
+                                    <option value="unitario">/ UN</option>
+                                    <option value="total">/ TOT</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label class="form-label text-surface-500">Mão de Obra</label>
-                        <input type="number" name="mao_de_obra" value="{{ old('mao_de_obra', 0) }}" class="form-input calc-trigger font-mono text-sm" step="0.01" min="0">
+                        <div class="relative">
+                            <input type="number" name="mao_de_obra" value="{{ old('mao_de_obra', 0) }}" class="form-input calc-trigger font-mono text-sm pr-[4.5rem] w-full" step="0.01" min="0">
+                            <div class="absolute inset-y-0 right-0 flex items-center">
+                                <select name="mao_de_obra_tipo" class="h-full py-0 pl-1 pr-6 border-transparent bg-transparent text-primary-600 font-medium text-[10px] uppercase tracking-wider focus:ring-0 cursor-pointer calc-trigger text-right">
+                                    <option value="unitario">/ UN</option>
+                                    <option value="total">/ TOT</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label class="form-label text-surface-500">Instalação</label>
-                        <input type="number" name="instalacao" value="{{ old('instalacao', 0) }}" class="form-input calc-trigger font-mono text-sm" step="0.01" min="0">
+                        <div class="relative">
+                            <input type="number" name="instalacao" value="{{ old('instalacao', 0) }}" class="form-input calc-trigger font-mono text-sm pr-[4.5rem] w-full" step="0.01" min="0">
+                            <div class="absolute inset-y-0 right-0 flex items-center">
+                                <select name="instalacao_tipo" class="h-full py-0 pl-1 pr-6 border-transparent bg-transparent text-primary-600 font-medium text-[10px] uppercase tracking-wider focus:ring-0 cursor-pointer calc-trigger text-right">
+                                    <option value="unitario">/ UN</option>
+                                    <option value="total">/ TOT</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -188,6 +233,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('form-proposta');
     const previewCard = document.getElementById('preview-card');
     const previewPreco = document.getElementById('preview-preco');
+    const previewTotalContainer = document.getElementById('preview-total-container');
+    const previewTotal = document.getElementById('preview-total');
     const previewBadge = document.getElementById('preview-badge');
     const previewAlerta = document.getElementById('preview-alerta');
     const previewDetalhamento = document.getElementById('preview-detalhamento');
@@ -195,6 +242,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const editalSelect = document.getElementById('edital-select');
 
     // Carregar editais
+    let editaisLoaded = [];
+    
     empresaSelect.addEventListener('change', async function() {
         const empresaId = this.value;
         editalSelect.innerHTML = '<option value="">Carregando...</option>';
@@ -209,10 +258,10 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const url = '{{ route("propostas.editais", ":id") }}'.replace(':id', empresaId);
             const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
-            const editais = await response.json();
+            editaisLoaded = await response.json();
 
             editalSelect.innerHTML = '<option value="">Selecione o edital</option>';
-            editais.forEach(e => {
+            editaisLoaded.forEach(e => {
                 const opt = document.createElement('option');
                 opt.value = e.edital_id;
                 opt.textContent = `${e.orgao} — ${e.objeto?.substring(0, 60) ?? ''}...`;
@@ -224,6 +273,67 @@ document.addEventListener('DOMContentLoaded', function() {
             editalSelect.innerHTML = '<option value="">Erro ao carregar</option>';
         }
     });
+
+    // Ao selecionar um edital, autocompletar descrição e preço estimado
+    editalSelect.addEventListener('change', function() {
+        const selectedId = this.value;
+        const edital = editaisLoaded.find(e => e.edital_id === selectedId);
+        
+        const inputDescricao = document.querySelector('input[name="item_descricao"]');
+        const inputQuantidade = document.querySelector('input[name="quantidade"]');
+        const inputEstimado = document.querySelector('input[name="preco_estimado_pncp"]');
+
+        if (edital) {
+            // Autocompleta a descrição do item com o objeto do edital
+            inputDescricao.value = edital.objeto || '';
+            
+            // Autocompleta a quantidade com a quantidade do edital
+            if (edital.quantidade) {
+                inputQuantidade.value = edital.quantidade;
+            } else {
+                inputQuantidade.value = 1;
+            }
+            
+            // Extrai o valor estimado do JSON financial_summary
+            if (edital.financial_summary) {
+                try {
+                    const finance = JSON.parse(edital.financial_summary);
+                    if (finance.estimativa) {
+                        inputEstimado.value = parseFloat(finance.estimativa).toFixed(2);
+                    }
+                } catch(e) {
+                    console.error('Erro ao parsear financial_summary', e);
+                }
+            }
+        } else {
+            inputDescricao.value = '';
+            inputEstimado.value = '';
+        }
+        
+        // Dispara o recálculo do preview e do valor total
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(calcularPreview, 300);
+        updateEstimadoTotal();
+    });
+
+    // Calcula valor total estimado
+    function updateEstimadoTotal() {
+        const qtdInput = document.querySelector('input[name="quantidade"]');
+        const unitarioInput = document.querySelector('input[name="preco_estimado_pncp"]');
+        const totalInput = document.getElementById('valor_total_estimado_pncp');
+        
+        if (qtdInput && unitarioInput && totalInput) {
+            const qtd = parseFloat(qtdInput.value) || 0;
+            const unit = parseFloat(unitarioInput.value) || 0;
+            const total = qtd * unit;
+            
+            totalInput.value = total > 0 ? total.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '';
+        }
+    }
+
+    document.querySelector('input[name="quantidade"]').addEventListener('input', updateEstimadoTotal);
+    document.querySelector('input[name="preco_estimado_pncp"]').addEventListener('input', updateEstimadoTotal);
+    updateEstimadoTotal();
 
     // Preview AJAX
     let debounceTimer;
@@ -264,6 +374,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const format = (v) => parseFloat(v).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             
             previewPreco.textContent = format(result.preco_minimo);
+            
+            if (result.quantidade) {
+                previewTotalContainer.classList.remove('hidden');
+                previewTotal.textContent = format(result.preco_total);
+            } else {
+                previewTotalContainer.classList.add('hidden');
+            }
 
             const badgeMap = {
                 'VERDE': 'badge-verde',

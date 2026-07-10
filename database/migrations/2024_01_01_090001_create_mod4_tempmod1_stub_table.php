@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('edital_id')->primary();
             $table->string('orgao')->nullable();
             $table->text('objeto')->nullable();
+            $table->integer('quantidade')->nullable();
             $table->text('doc_1')->nullable();
             $table->text('doc_2')->nullable();
             $table->text('doc_3')->nullable();

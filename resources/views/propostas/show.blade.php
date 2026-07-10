@@ -30,12 +30,25 @@
                 </span>
             </div>
 
-            <div class="bg-surface-50 rounded-xl p-6 border border-surface-200/60 flex justify-between items-center">
+            <div class="bg-surface-50 rounded-xl p-6 border border-surface-200/60 flex justify-between items-center mt-4">
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-surface-500 mb-1">Preço Mínimo</p>
+                    <p class="text-xs font-bold uppercase tracking-wider text-surface-500 mb-1">Preço Mínimo Unitário</p>
                     <div class="flex items-baseline gap-1.5">
                         <span class="text-surface-400 font-medium">R$</span>
                         <span class="text-4xl font-extrabold text-surface-900 tracking-tight">{{ number_format($proposta->preco_minimo_calculado, 2, ',', '.') }}</span>
+                    </div>
+                </div>
+                
+                <div class="text-right">
+                    <p class="text-xs font-bold uppercase tracking-wider text-surface-500 mb-1">Qtd</p>
+                    <div class="text-xl font-bold text-surface-700">{{ $proposta->quantidade }}</div>
+                </div>
+                
+                <div class="text-right border-l border-surface-200 pl-6">
+                    <p class="text-xs font-bold uppercase tracking-wider text-surface-500 mb-1">Preço Total</p>
+                    <div class="flex items-baseline gap-1.5">
+                        <span class="text-surface-400 font-medium">R$</span>
+                        <span class="text-3xl font-extrabold text-surface-900 tracking-tight">{{ number_format($proposta->preco_total_calculado, 2, ',', '.') }}</span>
                     </div>
                 </div>
                 
@@ -118,8 +131,12 @@
                 </div>
                 @if($proposta->preco_estimado_pncp)
                 <div class="pt-4 mt-2 border-t border-surface-200">
-                    <span class="text-xs text-surface-500 block mb-1">Estimado PNCP</span>
+                    <span class="text-xs text-surface-500 block mb-1">Valor Unitário Estimado (PNCP)</span>
                     <span class="font-mono text-sm font-semibold">R$ {{ number_format($proposta->preco_estimado_pncp, 2, ',', '.') }}</span>
+                </div>
+                <div class="pt-2 mt-2 border-t border-surface-200 border-dashed">
+                    <span class="text-xs text-surface-500 block mb-1">Valor Total Estimado (PNCP)</span>
+                    <span class="font-mono text-sm font-semibold">R$ {{ number_format($proposta->preco_estimado_pncp * $proposta->quantidade, 2, ',', '.') }}</span>
                 </div>
                 @endif
             </div>
@@ -141,11 +158,11 @@
                         @foreach($proposta->historicos as $hist)
                             <div class="p-4 flex justify-between items-center hover:bg-surface-50 transition-colors">
                                 <div>
-                                    <div class="font-medium text-sm text-surface-800">{{ $hist->fornecedor_nome }}</div>
-                                    <div class="text-xs text-surface-400 mt-0.5">{{ \Carbon\Carbon::parse($hist->registrado_em)->format('d/m/Y') }}</div>
+                                    <div class="font-medium text-sm text-surface-800">{{ ucfirst(strtolower(str_replace('_', ' ', $hist->tipo_documento))) }}</div>
+                                    <div class="text-xs text-surface-400 mt-0.5">Emissão: {{ \Carbon\Carbon::parse($hist->data_documento)->format('d/m/Y') }}</div>
                                 </div>
                                 <div class="font-mono text-sm font-semibold text-surface-700">
-                                    R$ {{ number_format($hist->valor_unitario, 2, ',', '.') }}
+                                    R$ {{ number_format($hist->valor_referencia, 2, ',', '.') }}
                                 </div>
                             </div>
                         @endforeach

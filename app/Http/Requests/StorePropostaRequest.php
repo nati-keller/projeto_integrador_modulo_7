@@ -22,7 +22,12 @@ class StorePropostaRequest extends FormRequest
             'impostos'            => 'nullable|numeric|min:0',
             'margem_lucro'        => 'required|numeric|min:0|max:1',
             'bdi_percentual'      => 'required|numeric|min:0|max:1',
+            'quantidade'          => 'required|integer|min:1',
             'preco_estimado_pncp' => 'nullable|numeric|min:0',
+            'frete_tipo'          => 'nullable|string|in:unitario,total',
+            'garantia_tipo'       => 'nullable|string|in:unitario,total',
+            'mao_de_obra_tipo'    => 'nullable|string|in:unitario,total',
+            'instalacao_tipo'     => 'nullable|string|in:unitario,total',
         ];
     }
 

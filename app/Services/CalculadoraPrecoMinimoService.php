@@ -17,8 +17,12 @@ class CalculadoraPrecoMinimoService
     {
         $this->validarInput($input);
 
+        $input = $this->normalizarCustosUnitarios($input);
+
         $custoTotal = $this->somarCustos($input);
         $precoMin   = $this->aplicarMargemEBDI($custoTotal, $input['margem_lucro'], $input['bdi_percentual']);
+        $quantidade = $input['quantidade'] ?? 1;
+        $precoTotal = $precoMin * $quantidade;
         $status     = $this->classificarMargem($precoMin, $input['preco_estimado_pncp'] ?? null);
         $alerta     = $this->verificarInexequibilidade($precoMin, $input['preco_estimado_pncp'] ?? null);
 
@@ -34,7 +38,9 @@ class CalculadoraPrecoMinimoService
             'impostos'                => $input['impostos'] ?? 0,
             'margem_lucro'            => $input['margem_lucro'],
             'bdi_percentual'          => $input['bdi_percentual'],
+            'quantidade'              => $quantidade,
             'preco_minimo_calculado'  => $precoMin,
+            'preco_total_calculado'   => $precoTotal,
             'preco_estimado_pncp'     => $input['preco_estimado_pncp'] ?? null,
             'margem_status'           => $status->value,
             'alerta_inexequibilidade' => $alerta,
@@ -44,6 +50,8 @@ class CalculadoraPrecoMinimoService
             'proposta'               => $proposta,
             'custo_total'            => $custoTotal,
             'preco_minimo'           => $precoMin,
+            'quantidade'             => $quantidade,
+            'preco_total'            => $precoTotal,
             'margem_status'          => $status,
             'alerta_inexequibilidade'=> $alerta,
             'detalhamento'           => $this->detalharCustos($input, $custoTotal, $precoMin),
@@ -53,14 +61,20 @@ class CalculadoraPrecoMinimoService
     // ── Apenas calcula, sem persistir (para preview em tempo real) ────────
     public function calcularSemSalvar(array $input): array
     {
+        $input = $this->normalizarCustosUnitarios($input);
+
         $custo    = $this->somarCustos($input);
         $preco    = $this->aplicarMargemEBDI($custo, $input['margem_lucro'] ?? 0, $input['bdi_percentual'] ?? 0);
+        $quantidade = $input['quantidade'] ?? 1;
+        $precoTotal = $preco * $quantidade;
         $status   = $this->classificarMargem($preco, $input['preco_estimado_pncp'] ?? null);
         $alerta   = $this->verificarInexequibilidade($preco, $input['preco_estimado_pncp'] ?? null);
 
         return [
             'custo_total'             => round($custo, 2),
             'preco_minimo'            => round($preco, 2),
+            'quantidade'              => $quantidade,
+            'preco_total'             => round($precoTotal, 2),
             'margem_status'           => $status->value,
             'alerta_inexequibilidade' => $alerta,
             'detalhamento'            => $this->detalharCustos($input, $custo, $preco),
@@ -75,6 +89,21 @@ class CalculadoraPrecoMinimoService
              + (float)($i['mao_de_obra']?? 0)
              + (float)($i['instalacao'] ?? 0)
              + (float)($i['impostos']   ?? 0);
+    }
+
+    private function normalizarCustosUnitarios(array $i): array
+    {
+        $qtd = (float)($i['quantidade'] ?? 1);
+        if ($qtd <= 0) $qtd = 1;
+
+        $campos = ['frete', 'garantia', 'mao_de_obra', 'instalacao'];
+        foreach ($campos as $campo) {
+            $tipo = $i["{$campo}_tipo"] ?? 'unitario';
+            if ($tipo === 'total' && isset($i[$campo])) {
+                $i[$campo] = (float)$i[$campo] / $qtd;
+            }
+        }
+        return $i;
     }
 
     private function aplicarMargemEBDI(float $custo, float $margem, float $bdi): float

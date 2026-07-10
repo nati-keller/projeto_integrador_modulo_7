@@ -17,6 +17,7 @@ return new class extends Migration
 
             // Dados do item
             $table->text('item_descricao');
+            $table->integer('quantidade')->default(1);
 
             // Componentes de custo
             $table->decimal('custo_base', 15, 2);           // obrigatório, > 0
@@ -32,6 +33,7 @@ return new class extends Migration
 
             // Resultados calculados
             $table->decimal('preco_minimo_calculado', 15, 2);
+            $table->decimal('preco_total_calculado', 15, 2)->nullable();
             $table->decimal('preco_estimado_pncp', 15, 2)->nullable();
 
             // Semáforo

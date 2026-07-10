@@ -205,10 +205,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('btn-copiar-bdi').addEventListener('click', function() {
         const valor = bdiValor.textContent;
-        const decimal = parseFloat(valor) / 100;
-        navigator.clipboard.writeText(decimal.toFixed(4));
+        const decimal = (parseFloat(valor) / 100).toFixed(4);
+        
+        // Fallback para ambientes locais HTTP sem HTTPS
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(decimal);
+        } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = decimal;
+            textArea.style.position = "absolute";
+            textArea.style.left = "-999999px";
+            document.body.prepend(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+            } catch (error) {
+                console.error('Falha ao copiar', error);
+            } finally {
+                textArea.remove();
+            }
+        }
+        
         const btn = this;
-        btn.innerHTML = '<svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Copiado!';
+        btn.innerHTML = '<svg class="w-4 h-4 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Copiado!';
         btn.classList.add('bg-green-50', 'text-green-600', 'border-green-200');
         setTimeout(() => {
             btn.innerHTML = 'Copiar Valor decimal';

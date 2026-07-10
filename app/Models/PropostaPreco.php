@@ -13,10 +13,10 @@ class PropostaPreco extends Model
     protected $table = 'mod7_propostas_precos';
 
     protected $fillable = [
-        'edital_id', 'empresa_id', 'item_descricao',
+        'edital_id', 'empresa_id', 'item_descricao', 'quantidade',
         'custo_base', 'frete', 'garantia', 'mao_de_obra',
         'instalacao', 'impostos', 'margem_lucro', 'bdi_percentual',
-        'preco_minimo_calculado', 'preco_estimado_pncp',
+        'preco_minimo_calculado', 'preco_total_calculado', 'preco_estimado_pncp',
         'margem_status', 'alerta_inexequibilidade',
     ];
 
